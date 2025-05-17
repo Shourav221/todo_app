@@ -1,9 +1,11 @@
-import 'dart:ffi';
+// import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Todo extends StatefulWidget {
-  const Todo({super.key});
+  final String? userName;
+  const Todo({super.key, this.userName});
 
   @override
   State<Todo> createState() => _TodoState();
@@ -13,12 +15,24 @@ class _TodoState extends State<Todo> {
   List<String> _tasks = [];
   TextEditingController TaskController = TextEditingController();
 
+  String displayName = "Shikhu";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTask();
+
+    displayName =
+        widget.userName?.isNotEmpty == true ? widget.userName! : "Shikhu";
+  }
+
   void _addTask() {
     if (TaskController.text.isNotEmpty) {
       setState(() {
         _tasks.add(TaskController.text);
         TaskController.clear();
       });
+      _saveTask();
     }
   }
 
@@ -26,16 +40,30 @@ class _TodoState extends State<Todo> {
     setState(() {
       _tasks.removeAt(index);
     });
+    _saveTask();
+  }
+
+  void _saveTask() async {
+    var pref = await SharedPreferences.getInstance();
+    pref.setStringList('task_list', _tasks);
+  }
+
+  void _loadTask() async {
+    final pref = await SharedPreferences.getInstance();
+    final savedTask = pref.getStringList('task_list');
+    if (savedTask != null) {
+      _tasks = savedTask;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     var ScreenSize = MediaQuery.of(context).size;
-    double FontSize = ScreenSize.width > 600 ? 32 : 20;
+    double FontSize = ScreenSize.width > 600 ? 25 : 20;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Shikhu\'s ToDo List',
+          '$displayName\'s ToDo List',
           style: TextStyle(
             color: Colors.white,
             fontSize: FontSize,
@@ -91,30 +119,39 @@ class _TodoState extends State<Todo> {
                 itemCount: _tasks.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    color: Colors.purpleAccent,
                     child: ListTile(
-                      leading: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          fontSize: FontSize,
-                          fontWeight: FontWeight.bold,
+                      leading: Container(
+                        height: 50,
+                        width: 40,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: FontSize,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       title: Text(
                         '${_tasks[index]}',
                         style: TextStyle(
                           fontSize: FontSize,
-                          color: Colors.white,
+                          color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      trailing: ElevatedButton(
+                      trailing: IconButton(
                         onPressed: () {
                           _deleteTask(index);
                         },
-                        child: Icon(
+                        icon: Icon(
                           Icons.delete,
                           color: Colors.red,
+                          size: 30,
                         ),
                       ),
                     ),
