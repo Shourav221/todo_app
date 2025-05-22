@@ -55,7 +55,12 @@ class welcomeScreen extends StatelessWidget {
                                 builder: (context) => Todo(
                                       userName: name,
                                     )));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Name Added Successfully')));
                         nameController.clear();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Enter Your Name')));
                       }
                     },
                     child: Text(
@@ -87,7 +92,8 @@ class welcomeScreen extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Todo()));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Todo()));
                     },
                     child: Text(
                       'Skip!',

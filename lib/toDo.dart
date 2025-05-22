@@ -1,5 +1,7 @@
 // import 'dart:ffi';
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +14,7 @@ class Todo extends StatefulWidget {
 }
 
 class _TodoState extends State<Todo> {
-  List<String> _tasks = [];
+  List<Map<String, dynamic>> _tasks = [];
   TextEditingController TaskController = TextEditingController();
 
   String displayName = "Shikhu";
@@ -29,7 +31,7 @@ class _TodoState extends State<Todo> {
   void _addTask() {
     if (TaskController.text.isNotEmpty) {
       setState(() {
-        _tasks.add(TaskController.text);
+        _tasks.add({'title': TaskController.text, 'done': false});
         TaskController.clear();
       });
       _saveTask();
@@ -43,17 +45,59 @@ class _TodoState extends State<Todo> {
     _saveTask();
   }
 
+  // For Alert Dialog
+
+  void showAlertDialog(int index) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.warning),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text('Warning'),
+                ],
+              ),
+              content: Text('Are you sure to delete your task ?'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      _deleteTask(index);
+                      Navigator.pop(context);
+                    },
+                    child: Text('Confirm')),
+                TextButton(onPressed: () {
+                  Navigator.pop(context);
+                }, child: Text('Cancel'))
+              ],
+            ));
+  }
+
   void _saveTask() async {
     var pref = await SharedPreferences.getInstance();
-    pref.setStringList('task_list', _tasks);
+    List<String> taskStrings = _tasks.map((task) => jsonEncode(task)).toList();
+    pref.setStringList('task_list', taskStrings);
   }
 
   void _loadTask() async {
     final pref = await SharedPreferences.getInstance();
-    final savedTask = pref.getStringList('task_list');
-    if (savedTask != null) {
-      _tasks = savedTask;
+    final savedTaskStrings = pref.getStringList('task_list');
+    if (savedTaskStrings != null) {
+      setState(() {
+        _tasks = savedTaskStrings
+            .map((task) => jsonDecode(task) as Map<String, dynamic>)
+            .toList();
+      });
     }
+  }
+
+  void _toggleDone(int index) {
+    setState(() {
+      _tasks[index]['done'] = !_tasks[index]['done'];
+    });
+    _saveTask();
   }
 
   @override
@@ -120,33 +164,31 @@ class _TodoState extends State<Todo> {
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                      leading: Container(
-                        height: 50,
-                        width: 40,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: FontSize,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      leading: IconButton(
+                          onPressed: () {
+                            _toggleDone(index);
+                          },
+                          icon: Icon(
+                            _tasks[index]['done']
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            color: Colors.green,
+                          )),
                       title: Text(
-                        '${_tasks[index]}',
+                        '${_tasks[index]['title']}',
                         style: TextStyle(
                           fontSize: FontSize,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
+                          decoration: _tasks[index]['done']
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+
                         ),
                       ),
                       trailing: IconButton(
                         onPressed: () {
-                          _deleteTask(index);
+                          showAlertDialog(index);
                         },
                         icon: Icon(
                           Icons.delete,
