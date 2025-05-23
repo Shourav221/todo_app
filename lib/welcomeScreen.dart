@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_app/toDo.dart';
 
 class welcomeScreen extends StatelessWidget {
@@ -46,15 +47,21 @@ class welcomeScreen extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       String name = nameController.text;
                       if (name.isNotEmpty) {
+                        final pref = await SharedPreferences.getInstance();
+                        await pref.setBool('isLoggedIn', true);
+                        await pref.setString('username', name);
+
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => Todo(
                                       userName: name,
                                     )));
+
+                        // this is for Showing scackbar
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Name Added Successfully')));
                         nameController.clear();
@@ -72,8 +79,9 @@ class welcomeScreen extends StatelessWidget {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                    ),
+                        backgroundColor: Colors.teal,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20))),
                   ),
                 ),
               ),
@@ -105,6 +113,43 @@ class welcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(
+                height: Height * 0.27,
+              ),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Developed by ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '\nSHOURAV KUMAR MAHATO\n',
+                      style: TextStyle(
+                        color: Colors.black87,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'Flutter Developer • Cross-Platform Specialist\n',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    TextSpan(
+                      text: '📧 asashish607@gmail.com',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
