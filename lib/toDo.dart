@@ -31,7 +31,7 @@ class _TodoState extends State<Todo> {
   void _addTask() {
     if (TaskController.text.isNotEmpty) {
       setState(() {
-        _tasks.add({'title': TaskController.text, 'done': false});
+        _tasks.insert(0, {'title': TaskController.text, 'done': false});
         TaskController.clear();
       });
       _saveTask();
@@ -53,7 +53,10 @@ class _TodoState extends State<Todo> {
         builder: (context) => AlertDialog(
               title: Row(
                 children: [
-                  Icon(Icons.warning),
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                  ),
                   SizedBox(
                     width: 10,
                   ),
@@ -67,10 +70,24 @@ class _TodoState extends State<Todo> {
                       _deleteTask(index);
                       Navigator.pop(context);
                     },
-                    child: Text('Confirm')),
-                TextButton(onPressed: () {
-                  Navigator.pop(context);
-                }, child: Text('Cancel'))
+                    child: Text(
+                      'Confirm',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    )),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
+                    ))
               ],
             ));
   }
@@ -183,7 +200,6 @@ class _TodoState extends State<Todo> {
                           decoration: _tasks[index]['done']
                               ? TextDecoration.lineThrough
                               : TextDecoration.none,
-
                         ),
                       ),
                       trailing: IconButton(

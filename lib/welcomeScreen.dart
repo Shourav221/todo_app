@@ -11,7 +11,7 @@ class welcomeScreen extends StatelessWidget {
     double Height = MediaQuery.of(context).size.height;
     double Width = MediaQuery.of(context).size.width;
 
-    double Esize = Height < Width ? Width * 0.085 : Height * 0.06;
+    double Esize = Height < Width ? Width * 0.085 : Height * 0.09;
     double Fsize = Height < Width ? Width * 0.05 : Width * 0.06;
     return Scaffold(
       appBar: AppBar(),
